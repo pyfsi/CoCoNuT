@@ -1,6 +1,6 @@
-# SolverWrapperOpenFOAM
+# OpenFOAM
 
-This is the documentation for all OpenFOAM solver-wrappers.
+This is the documentation for all OpenFOAM solver wrappers.
 Currently only FSI simulations are supported, no other multiphysics problems.
 
 
@@ -11,25 +11,29 @@ This section describes the parameters in the JSON file, listed in alphabetical o
 parameter|type|description
 ---:|:---:|---
 `application`|string|Name of the (adapted) OpenFOAM-solver to be used for the flow problem. This name should start with `CoCoNuT_`.
-`working_directory`|string|Directory where the OpenFOAM-case is defined (and which contains the JSON-file).
-`dimensions`|int|Dimension used in flow solver: 2 for 2D and axisymmetric, 3 for 3D. 
-`start_time`|double|Physical start time of the simulation. This should correspond to the name of the time step folder in OpenFOAM from which the initial data and boundary conditions are read.
-`end_time`|double|Physical end time of the simulation.
-`delta_t`|double|Fixed timestep size in flow solver. This parameter is usually specified in a higher `Component`.
-`boundary_names`|list| List of names of the patches corresponding to the interface. These names should match the patch names defined in the OpenFOAM-case.
-`interface_input`|dict| List of `ModelPart` names and `Variables` pairs that provides interface boundary conditions for the OpenFOAM solver. Each entry in the list has two keys: `model_part` and `variables` with values as name of the `ModelPart` and list of input variables available in `variables.py`. The `ModelPart` name must be the concatenation of an entry from `boundary_names` and "_input".
-`interface_output`|dict| Analogous to `interface_input`, but here the name must be the concatenation of an entry from `boundary_names` and "_output". The entries in the list provides boundary conditions for the other solver(s) participating in the coupled simulation.
+`boundary_names`|list| List of names of the patches corresponding to the interface. These names should match the patch names defined in the OpenFOAM-case (e.g.`["boundary1", "boundary2",...] `).
 `cores`|int|Number of cores on which the OpenFOAM-solver can run. This variable will be replaced in the raw `decomposeParDict`-file, after which the case is decomposed of the given number of cores.
 `decomposeMethod`|string|Name of the mesh decomposition method to be used in OpenFOAM (e.g. `simple`,`scotch`...).
+`delta_t`|double|Fixed timestep size in flow solver. This parameter is usually specified in a higher `Component`.
+`density`|int|The applied density of the fluid in an incompressible case. The density will be applied if `"is_incompressible` is set on `true`. 
+`diffusivity`|string |Name of the diffusivity constant used in the mesh motion solver in OpenFOAM (e.g. `inverseDistance`...). 
+`dimensions`|int|Dimension used in flow solver: 2 for 2D and axisymmetric, 3 for 3D. 
+`end_time`|double|Physical end time of the simulation.
+`interface_input`|dict| List of `ModelPart` names and `Variables` pairs that provides interface boundary conditions for the OpenFOAM solver. Each entry in the list has two keys: `model_part` and `variables` with values as name of the `ModelPart` and list of input variables available in `variables.py`. The `ModelPart` name must be the concatenation of an entry from `boundary_names` and "_input" (e.g. `{ "model_part": boundary1_input", "variables": ["displacement"]}`).
+`interface_output`|dict| Analogous to `interface_input`, but here the name must be the concatenation of an entry from `boundary_names` and "_output". The entries in the list provides boundary conditions for the other solver(s) participating in the coupled simulation (e.g. `{ "model_part": boundary1_output", "variables": ["pressure", "traction"]}`).
+`is_incompressible`|boolean| Indicates if the fluid film is behaving under incompressible or compressible conditions.
+`meshmotion_solver`|string|Name of the mesh motion solver to be used in OpenFOAM (e.g. `displacementLaplacian`...).
+`start_time`|double|Physical start time of the simulation. This should correspond to the name of the time step folder in OpenFOAM from which the initial data and boundary conditions are read.
+`time_precision`|int|Number of digits after the decimal sign to be used in the name of the time step directories which are made during execution. 
 `write_interval`|double|Period between subsequent saves of the entire flow field.
 `write_precision`|int|Number of digits after the decimal sign to be used when writing data to time step folders or the `postProcessing`-folder.
-`time_precision`|int|Number of digits after the decimal sign to be used in the name of the time step directories which are made during execution.
-`meshmotion_solver`|string|Name of the mesh motion solver to be used in OpenFOAM (e.g. `displacementLaplacian`...).
-`diffusivity`|string |Name of the diffusivity constant used in the mesh motion solver in OpenFOAM (e.g. `inverseDistance`...). 
+`working_directory`|string|Directory where the OpenFOAM-case is defined (and which contains the JSON-file).
 
-## Overview of the Python-file
 
-The solver-wrapper itself consists of only one Python-file: `OpenFOAM_X.py`, with `X`the identifier of the OpenFOAM-version (e.g. `41` for OpenFOAM 4.1). Aside from this, the Python-file constructs a number of files such as `controlDict`, `pointDisplacement` and `decomposeParDict` by starting from the `_raw`-files in the solver-wrapper directory and replacing the names of the settings with their user-defined values (listed in the table above). Finally, using an OpenFOAM-solver in CoCoNuT requires the adaptation of the solver to accomodate the internal messaging system used during the FSI-simulation. Currently, only `pimpleFoam` and `interFoam` have been adapted; the solvers called by the solver-wrapper have the same name as the original OpenFOAM-solver but with `CoCoNuT_` added to the name. Upon using the OpenFOAM-wrapper, the solver to be used upon execution needs to be compiled using the default OpenFOAM-compilation method (loading the OpenFOAM-module and using `wmake`).
+
+## Overview of the OpenFOAM-wrapper
+
+The solver wrapper can be found in the `solver_wrapper.openfoam.vX`-directory and consists of only one Python-file: `vX.py`, with `X`the identifier of the OpenFOAM-version (e.g. `v41` for OpenFOAM 4.1). Aside from this, the Python-file constructs a number of files such as `controlDict`, `pointDisplacement`, `dynamicMeshDict` and `decomposeParDict` by starting from the `_raw`-files in the solver wrapper directory and replacing the names of the settings with their user-defined values (listed in the table above). Finally, using an OpenFOAM-solver in CoCoNuT requires the adaptation of the solver to accomodate the internal messaging system used during the FSI-simulation. Currently, only `pimpleFoam` and `interFoam` have been adapted; the solvers called by the solver wrapper have the same name as the original OpenFOAM-solver but with `CoCoNuT_` added to the name. `CoCoNuT_pimpleFoam` treads FSI simulations whereas the fluid is approached as isothermal and incompressible in a laminar or turbulent transient case. `CoCoNuT_interFoam` is apllied for two incompressible, isothermal immiscible fluids. Upon using the OpenFOAM-wrapper, the solver to be used upon execution needs to be compiled using the default OpenFOAM-compilation method (loading the OpenFOAM-module and using `wmake` in the `solver_wrapper.CoCoNuT_xxxxFoam`-directory).
 
 ### The `__init__` method
 
@@ -41,7 +45,7 @@ The OpenFOAM-solver, which should be adapted to operation in CoCoNuT, is launche
 
 ### The `InitializeSolutionStep` method
 
-This function is called at the start of every time step. The time step index is increased by one, the iteration index is set to zero and the OpenFOAM file directory is made in which the time step data needs to be stored (this last part is probably superfluous and can be removed at a later stage).
+This function is called at the start of every time step. The time step index is increased by one, the iteration index is set to zero and the OpenFOAM file directory is made in which the time step data needs to be stored.
 
 ### The `SolveSolutionStep` method
 
@@ -99,7 +103,7 @@ Following items are taken care of by CoCoNuT, and must therefore not be included
 
 ## Version specific documentation
 
-### OpenFOAM_41 (OpenFOAM 4.1)
+### v41 (OpenFOAM 4.1)
 
 This is currently the only version.
 
