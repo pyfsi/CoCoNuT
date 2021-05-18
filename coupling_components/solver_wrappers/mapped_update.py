@@ -162,13 +162,13 @@ class SolverWrapperMapped_update(Component):
         self.interface_new_to = data_structure.Interface(self.interface_input_to.parameters, self.model_new_to)
 
 
-        # for i in self.interface_new_to.parameters:
-        #     tyl = self.interface_new_to.get_model_part(i['model_part'])
-        #     tyl2 = self.interface_new_to.get_variable_data(i["model_part"],i['variables'][0])
-        #     # print("x-coord new interface output from")
-        #     # print(tyl.x0)
-        #     print("y-coord new interface output from")
-        #     print(tyl.y0)
+        for i in self.interface_new_to.parameters:
+            tyl = self.interface_new_to.get_model_part(i['model_part'])
+            tyl2 = self.interface_new_to.get_variable_data(i["model_part"],i['variables'][0])
+            # print("x-coord new interface output from")
+            # print(tyl.x0)
+            # print("y-coord new interface output from")
+            # print(tyl.y0)
             # print("z-coord new interface output from")
             # print(tyl.z0)
 
@@ -196,16 +196,16 @@ class SolverWrapperMapped_update(Component):
 
         self.mapper_interface_input(self.interface_input_from, self.interface_input_to)
 
-        # if self.iteration ==2:
-        #     for i in self.interface_input_to.parameters:
-        #         mp = self.interface_input_to.get_model_part(i['model_part'])
-        #         print("y-coord interface input to after mapping")
-        #
-        #         check2 = self.interface_input_to.get_variable_data(i['model_part'], i['variables'][0])
-        #         print('check2')
-        #         print(mp.y0,check2)
+        if self.iteration ==2:
+            for i in self.interface_input_to.parameters:
+                mp = self.interface_input_to.get_model_part(i['model_part'])
+                # print("y-coord interface input to after mapping")
+                # print(mp.x0)
+                # check2 = self.interface_input_to.get_variable_data(i['model_part'], i['variables'][0])
+                # print('check2')
+                # print(mp.y0,check2)
 
-        interface_output_from = self.solver_wrapper.solve_solution_step(self.interface_input_to)
+        self.interface_output_from = self.solver_wrapper.solve_solution_step(self.interface_input_to)
 
         # Creating an updated interface_output_from
 
@@ -260,7 +260,7 @@ class SolverWrapperMapped_update(Component):
         self.mapper_interface_output = create_instance(self.settings["mapper_interface_output"])
         #todo self.interface_output_to van naam veranderen
         self.mapper_interface_output.initialize(self.interface_output_from_new, self.interface_output_to)
-        self.mapper_interface_output(interface_output_from, self.interface_output_to)
+        self.mapper_interface_output(self.interface_output_from, self.interface_output_to)
         # plt.show()
 
 

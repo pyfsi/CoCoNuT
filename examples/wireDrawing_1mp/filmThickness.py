@@ -28,7 +28,11 @@ X_name = os.path.join('CFD', '0/ccx')
 Y_name = os.path.join('CFD', '0/ccy')
 Z_name = os.path.join('CFD', '0/ccz')
 pointDisplacement = os.path.join('CFD', '0.010000/cellDisplacement')
-
+initial_load = np.genfromtxt ('initial_pressure.dat')
+x = initial_load[:,0]
+y = initial_load[:,1]
+print(x)
+print(y)
 fX = open(X_name, 'r')
 fY = open(Y_name, 'r')
 fZ = open(Z_name, 'r')
@@ -56,7 +60,8 @@ for line in range(len(fXLines)):
             array2[i,1] = float(fYLines[line+6+i])/(np.cos(2.5*np.pi/180))
             array2[i,2] = 0
 
-array_filmthickness = array[:,1] - array2[:,1]
+array_filmthickness = (array[:,1] - array2[:,1])*1000000
+# print(array_filmthickness)
 
 for line in range(len(fTempLines)):
     if "Wire" in fTempLines[line]:
@@ -64,7 +69,6 @@ for line in range(len(fTempLines)):
         array_disp = np.zeros((count,3))
         for i in range(count):
             coor = (fTempLines[line + 6 + i])
-            print(coor)
             array_disp[i,0] = 0
             if coor[18:19]==' ':
                 p = float(coor[3:18])
@@ -94,7 +98,8 @@ for line in range(len(fTempLines)):
 
         array_disp[i,1] = array_disp[i,1]/(np.cos(2.5*np.pi/180))
 
-array_filmthickness = array[:,1] - array2[:,1] + array_disp[:,1]
+array_filmthickness2 = (array[:,1] - array2[:,1] - array_disp[:,1])*1000000
+# print(array_filmthickness2)
 fig, ax1 = plt.subplots()
 
 fig.suptitle('film thickness', fontsize = 20)
@@ -102,10 +107,16 @@ fig.suptitle('film thickness', fontsize = 20)
 ax1.set_xlabel('wire position(m)')
 
 color2 = 'tab:blue'
-ax1.set_ylabel("Radial displacement surface wire (m)")
-ax1.plot(array[:,0], array_filmthickness, color=color2)
+ax1.set_ylabel("Initial load (Pa)")
+ax1.plot(x,y, color=color2)
 ax1.tick_params(axis='y', labelcolor=color2)
+
+ax2 = ax1.twinx()
+
+color = 'tab:red'
+ax2.set_ylabel(" Film thickness at 1.5 iterations (µm)")
+ax2.plot(array[:,0], array_filmthickness2, color=color)
+ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()
 plt.show()
-

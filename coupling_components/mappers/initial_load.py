@@ -61,28 +61,30 @@ class Mapper_initial_load(MapperTransformer):
             x_axis = x.flatten()
             pressure = y.flatten()
 
-            f = interpolate.interp1d(x_axis, pressure)
+            f = interpolate.interp1d(x_axis, pressure, fill_value='extrapolate')
 
             if dimensions == 1:
-                data_to = np.zeros((self.mp_input_to.size, 1))
-                for i in range(self.mp_input_to.size):
-                    if self.mp_input_to.x0[i] > self.v_min:
-                        data_to[i] = f(self.mp_input_to.x0[i])
-                    else:
-                        data_to[i] = 0
+                data_to = self.data_from
+                # data_to = np.zeros((self.mp_input_to.size, 1))
+                # for i in range(self.mp_input_to.size):
+                #     if self.mp_input_to.x0[i] > self.v_min:
+                #         data_to[i] = f(self.mp_input_to.x0[i])
+                #     else:
+                #         data_to[i] = 0
 
             elif dimensions == 3:
 
-                data_to = np.zeros((self.mp_input_to.size, 3))
-                for j in range(self.mp_input_to.size):
-                    if self.mp_input_to.x0[j] < self.v_min:
-                        data_to[j, 0] = 0
-                        data_to[j, 1] = 0
-                        data_to[j, 2] = 0
-                    else:
-                        data_to[j, 0] = 0
-                        data_to[j, 1] = 0
-                        data_to[j, 2] = 0
+                # data_to = np.zeros((self.mp_input_to.size, 3))
+                data_to = self.data_from
+                # for j in range(self.mp_input_to.size):
+                #     if self.mp_input_to.x0[j] < self.v_min:
+                #         data_to[j, 0] = 0
+                #         data_to[j, 1] = 0
+                #         data_to[j, 2] = 0
+                #     else:
+                #         data_to[j, 0] = 0
+                #         data_to[j, 1] = 0
+                #         data_to[j, 2] = 0
             else:
                 raise NotImplementedError(
                     f'MapperUpdateLoad not implemented for variable of dimension {dimensions}')
@@ -100,16 +102,8 @@ class Mapper_initial_load(MapperTransformer):
 
             elif dimensions == 3:
 
-                data_to = np.zeros((self.mp_input_to.size, 3))
-                for j in range(self.mp_input_to.size):
-                    if self.mp_input_to.x0[j] < self.v_min:
-                        data_to[j, 0] = 0
-                        data_to[j, 1] = 0
-                        data_to[j, 2] = 0
-                    else:
-                        data_to[j, 0] = 0
-                        data_to[j, 1] = 0
-                        data_to[j, 2] = 0
+                data_to = self.data_from
+
             else:
                 raise NotImplementedError(
                     f'MapperUpdateLoad not implemented for variable of dimension {dimensions}')

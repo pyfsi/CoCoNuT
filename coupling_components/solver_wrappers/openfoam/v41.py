@@ -501,7 +501,7 @@ class SolverWrapperOpenFOAM_41(Component):
             control_dict = re.sub(r'timePrecision' + of_io.delimter + of_io.int_pattern,
                                   f'timePrecision    {self.time_precision}',
                                   control_dict)
-            control_dict = re.sub(r'endTime' + of_io.delimter + of_io.float_pattern, f'endTime    1e15', control_dict)
+            control_dict = re.sub(r'endTime' + of_io.delimter + of_io.float_pattern, f'endTime    0.01', control_dict)
 
             # delete previously defined coconut functions
             coconut_start_string = '// CoCoNuT function objects'

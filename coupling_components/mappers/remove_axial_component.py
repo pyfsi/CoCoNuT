@@ -58,17 +58,14 @@ class MapperRemoveAxialComponent(MapperTransformer):
 
         dimensions = variables_dimensions[var]
         data_from = interface_from.get_variable_data(mp_name_from, var)
-        # it = mapped_update.get_iteration
-        # print("data_from")
-        # print(data_from)
+
         if dimensions == 3:
             data_to = np.tile(data_from, (1, 1))
 
-            data_to[:,self.dir_r] = 0
+            data_to[:,self.dir_r] = 0.0
             data_to[:, self.dir_a] = self.radius + data_to[:,self.dir_a]
 
         else:
             raise NotImplementedError(f'MapperRemoveAxialComponent not implemented for variable of dimension {dimensions}')
-        # print("data_to")
-        # print(data_to)
+
         interface_to.set_variable_data(mp_name_to, var, data_to)
