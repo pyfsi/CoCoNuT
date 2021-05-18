@@ -486,6 +486,7 @@ class SolverWrapperOpenFOAM_41(Component):
             self.write_interval = of_io.get_int(input_string=control_dict, keyword='writeInterval')
             time_format = of_io.get_string(input_string=control_dict, keyword='timeFormat')
             self.write_precision = of_io.get_int(input_string=control_dict, keyword='writePrecision')
+
             if not time_format == 'fixed':
                 msg = f'timeFormat:{time_format} in controlDict not implemented. Changed to "fixed"'
                 tools.print_info(msg, layout='warning')
